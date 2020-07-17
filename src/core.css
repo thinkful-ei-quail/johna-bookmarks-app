@@ -1,0 +1,232 @@
+h1 {
+    text-align: center;
+}
+
+ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+select { /* webkit-specific solution to webkit-specific text-alignment quirk */
+    display: -webkit-box !important;
+}
+
+button, input[type="submit"], input[type="reset"] {
+    background-color: var(--ui-color);
+    border: none;
+    min-height: 2em;
+    justify-content: center;
+    place-items: center;
+}
+
+.collapsed { /* if you're collapsed, that takes precedence over however you're displayed when not collapsed */
+    display: none !important;
+}
+
+html {
+    --background-color: white;
+    --star-active-color: gold;
+    --star-inactive-color: black;
+    --star-highlight-color: red;
+    --ui-color: #daa118;
+    background-color: var(--background-color);
+    display: flex;
+    height: 100vh;
+    justify-content: center;
+}
+
+body {
+    width: 100vw;
+    max-width: 750px;
+}
+
+body, body * {
+    display: flex;
+    flex-direction: column;
+}
+
+#controls {
+    flex-direction: row;
+    place-content: center;
+}
+
+#controls>* {
+    display: grid;
+    flex: 1 1 10%;
+    margin-left: 1em;
+    margin-right: 0.5em;
+    max-width: 200px;
+}
+
+#controls>*+* {
+    margin-left: 0.5em;
+}
+
+#controls>*:last-child {
+    margin-right: 1em;
+}
+
+#new-bookmark-form {
+    position: relative;
+    z-index: 1;
+}
+
+#new-bookmark-form::before {
+    top: -100vh;
+    left: -100vw;
+    height: 999vh;
+    width: 999vw;
+    background: rgba(0,0,0,0.5);
+    content: '';
+    position: fixed;
+    z-index: -1;
+}
+
+#new-bookmark-form::after {
+    height: 100%;
+    width: 100%;
+    background: var(--background-color);
+    content: '';
+    position: absolute;
+    z-index: -1;
+}
+
+#new-bookmark-form>* {
+    margin: 0.5em;
+}
+
+.error {
+    background: red;
+    padding: 1em;
+    border-radius: 1em;
+    margin-bottom: 0;
+}
+
+#new-bookmark-form+.error {
+    z-index: 1;
+}
+
+.error:empty {
+    display: none;
+}
+
+.bookmark {
+    margin-bottom: 0;
+}
+
+.bookmark-header {
+    align-items: center;
+    flex-direction: row;
+    justify-content: unset;
+    overflow-wrap: anywhere;
+    padding: 0 2em 0 0;
+    position: relative;
+    text-align: left;
+}
+
+.bookmark-header::after {
+    content: '';
+    position: absolute;
+    right: 2em;
+    height: 0.5em;
+    width: 0.5em;
+    border: solid black;
+    border-width: 0 2px 2px 0;
+    transform: translateY(10%) rotate(45deg);
+}
+
+.bookmark-header[aria-expanded="true"]::after {
+    transform: translateY(50%) rotate(-135deg);
+}
+
+.header-rating {
+    width: 1em;
+    height: 1em;
+    align-items: center;
+    color: var(--background-color);
+    font-size: 3em;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+}
+
+.header-rating::after {
+    color: black;
+    content: attr(data-rating);
+    font-size: calc(1em / 3);
+    position: absolute;
+}
+
+[aria-expanded="true"] .header-rating {
+    visibility: hidden;
+}
+
+.bookmark-details {
+    border: 2px solid var(--ui-color);
+    display: block;
+    padding: 1em;
+}
+
+.bookmark-details>:first-child {
+    float: left;
+}
+
+.bookmark-details>:nth-child(0n+2) {
+    float: right;
+}
+
+.bookmark-details>:nth-child(0n+3) {
+    clear: both;
+}
+
+.bookmark-details .no-rating {
+    display: none;
+}
+
+.stars {
+    flex-direction: row;
+    margin: 0 auto 0.5em;
+}
+
+.stars>input {
+    width: 2em;
+    height: 2em;
+    overflow: hidden;
+    position: relative;
+}
+
+.stars>input:focus {
+    outline: none;
+}
+
+.stars>input::after {
+    color: var(--star-active-color);
+    content: "★";
+    background: var(--background-color);
+    font-size: 2em;
+    text-align: center;
+}
+
+.stars>input:indeterminate::after, .stars>input:checked~input::after {
+    color: var(--star-inactive-color);
+}
+
+.stars:hover>input::after, .stars:focus-within>input::after {
+    text-shadow: 1px 0 var(--star-highlight-color),
+        -1px 0 var(--star-highlight-color),
+        0 1px var(--star-highlight-color),
+        0 -1px var(--star-highlight-color);
+}
+
+.stars>input:hover~input::after, .stars>input:focus~input::after {
+    text-shadow: none;
+}
+
+@media all and (min-width: 600px) {
+    .bookmark-details>:last-child {
+        float: left;
+        clear: none;
+        margin-left: 1em;
+    }
+}
