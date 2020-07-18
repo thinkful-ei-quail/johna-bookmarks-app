@@ -1,12 +1,13 @@
 import $ from 'jquery';
 import api from './bookmarksApi.js';
 import store from './bookmarksStore.js';
+import trashIcon from './trash.png';
 
 const ifRating = (val, fallback) => ((val >= 1) && (val <= 5)) ? val : fallback;
 
 const bookmarkIdFrom$Target = $target => $target.closest('li').data('id');
 
-// IMPORTANT -- :indeterminate style only works if these are wrapped by a form
+// IMPORTANT -- :indeterminate selector only works if these are wrapped by a form
 // any call site that isn't naturally inside a form needs to wrap this result w/ <form></form>
 const generateRatingEditorHtml = current => `<div class="stars">
   <input name="rating" type="radio" ${(current===1)?'checked ':''}value="1" aria-label="1 Star">
@@ -19,8 +20,8 @@ const generateRatingEditorHtml = current => `<div class="stars">
 
 const generateNewBookmarkFormHtml = expanded => `<form id="new-bookmark-form" class="${expanded?'':'collapsed'}"
   role="dialog" aria-modal="true" aria-labelledby="new-bookmark-form-title"><h2 id="new-bookmark-form-title"
-  >Add new bookmark</h2><input id="url" placeholder="http://samplelink.code/toInfinityAndBeyond"><input
-  placeholder="Title" id="title">${generateRatingEditorHtml()}<textarea placeholder="Add a description (optional)"
+  >Add new bookmark</h2><input name="url" class="http" placeholder="http://samplelink.code/toInfinityAndBeyond"><input
+  placeholder="Title" name="title">${generateRatingEditorHtml()}<textarea placeholder="Add a description (optional)"
   id="desc"></textarea><input type="reset" id="cancel-add" value="Cancel"><input type="submit" value="Create">
 </form>`;
 
@@ -32,7 +33,7 @@ const generateBookmarkHtml = (id, title, url, desc, rating, expanded) => {
   aria-labelledby="header-${id}" id="expanded-${id}" class="bookmark-details ${expanded?'expanded':'collapsed'}"
   ><div><form>${generateRatingEditorHtml(rating)}</form><a href="${url}">Visit Site</a></div><button
   aria-label="Delete bookmark" class="bookmark-killer"
-  >X</button><p>${typeof(desc) === 'string' ? desc : ''}</p></div></li>`;
+  ><img src="${trashIcon}"></button><p>${typeof(desc) === 'string' ? desc : ''}</p></div></li>`;
 };
 
 const generateBookmarkListHtml = bookmarks => 
@@ -93,9 +94,7 @@ const onFilterChanged = e => {
 };
 
 const onHeaderClicked = e => {
-  const bookmark = store.findBookmark(bookmarkIdFrom$Target($(e.target)));
-  bookmark.expanded = !bookmark.expanded;
-  render();
+  expand(bookmarkIdFrom$Target($(e.target)), true);
 };
 
 const onBookmarkKillerClicked = e => {
@@ -106,17 +105,36 @@ const onBookmarkKillerClicked = e => {
     .finally(render);
 };
 
+const onBookmarkRated = e => {
+  const $target = $(e.target);
+  const rating = +$target.val();
+  const id = bookmarkIdFrom$Target($target);
+  api.update(store.encodedUserName(), id, { rating })
+    .then(() => store.findBookmark(id).rating = rating)
+    .catch(err => store.error(err))
+    .finally(render);
+};
+
 const onZeroRatingClicked = e => {
   const $target = $(e.target);
   if($target.closest('#new-bookmark-form')) // for the adder, no api calls yet; just re-render the editor
     renderRatingEditor($target.closest('.stars'));
-  else { // the api doesn't seem to allow an existing rating to be zeroed; we'll hide this feature with css
+  else { // the api doesn't seem to allow an existing rating to be nulled or zeroed; we'll hide this feature with css
 /*    const bookmark = store.findBookmark(bookmarkIdFrom$Target($target));
     api.update(store.encodedUserName(), bookmark.id, { rating: 0 })
       .then(() => bookmark.rating = 0)
       .catch(err => store.error(err))
       .finally(render);
 */  }
+};
+
+const expand = (linkedBookmarkId, toggle) => {
+  const linked = store.findBookmark(linkedBookmarkId);
+  if(linked) {
+    linked.expanded = toggle ? !linked.expanded : true;
+    render();
+    $(`#header-${linkedBookmarkId}`)[0].scrollIntoView();
+  }
 };
 
 export default {
@@ -131,16 +149,11 @@ export default {
     $bodyElement.on('input', '#filter', onFilterChanged);
     $bodyElement.on('click', '#cancel-add', onAddClicked);
     $bodyElement.on('submit', '#new-bookmark-form', onAddFormSubmitted);
+    $bodyElement.on('change', 'li .stars input', onBookmarkRated);
     $bodyElement.on('click', '.no-rating', onZeroRatingClicked);
     $bodyElement.on('click', '.bookmark-header', onHeaderClicked);
     $bodyElement.on('click', '.bookmark-killer', onBookmarkKillerClicked);
   },
 
-  expand: (linkedBookmarkId) => {
-    const linked = store.findBookmark(linkedBookmarkId);
-    if(linked) {
-      linked.expanded = true;
-      render();
-    }
-  }
+  expand,
 };

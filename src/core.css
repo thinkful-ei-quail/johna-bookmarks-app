@@ -12,9 +12,10 @@ select { /* webkit-specific solution to webkit-specific text-alignment quirk */
     display: -webkit-box !important;
 }
 
-button, input[type="submit"], input[type="reset"] {
+button, input[type="submit"], input[type="reset"], .bookmark-details a {
     background-color: var(--ui-color);
     border: none;
+    color: black;
     min-height: 2em;
     justify-content: center;
     place-items: center;
@@ -128,20 +129,22 @@ body, body * {
 .bookmark-header::after {
     content: '';
     position: absolute;
-    right: 2em;
+    right: 1em;
     height: 0.5em;
     width: 0.5em;
     border: solid black;
     border-width: 0 2px 2px 0;
-    transform: translateY(10%) rotate(45deg);
+    transform: translateY(-25%) rotate(45deg);
 }
 
 .bookmark-header[aria-expanded="true"]::after {
-    transform: translateY(50%) rotate(-135deg);
+    transform: translateY(25%) rotate(-135deg);
 }
 
 .header-rating {
     width: 1em;
+    min-width: 1em; /* at some screen widths, chrome needs extra convincing that i really want 1em */
+    max-width: 1em;
     height: 1em;
     align-items: center;
     color: var(--background-color);
@@ -157,10 +160,10 @@ body, body * {
     font-size: calc(1em / 3);
     position: absolute;
 }
-
+/*
 [aria-expanded="true"] .header-rating {
     visibility: hidden;
-}
+}*/
 
 .bookmark-details {
     border: 2px solid var(--ui-color);
@@ -182,6 +185,23 @@ body, body * {
 
 .bookmark-details .no-rating {
     display: none;
+}
+
+.bookmark-killer {
+    padding-top: 1em;
+    background-clip: content-box;
+}
+
+.bookmark-killer>img {
+    width: calc(100vw - 13em - 4px);
+    min-width: 24px;
+    max-width: 48px;
+}
+
+.bookmark-details p {
+    background: khaki;
+    background-clip: content-box;
+    padding-top: 1em;
 }
 
 .stars {

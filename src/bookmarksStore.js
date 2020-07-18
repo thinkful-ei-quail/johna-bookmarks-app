@@ -20,7 +20,7 @@ export default {
   assignUser: (encodedUser, decodedUser) => store.user = { encodedUser, decodedUser },
   decodedUserName: () => store.user.decodedUser,
   encodedUserName: () => store.user.encodedUser,
-  error: err => err ? (store.error = err) : store.error,
+  error: err => (err!==undefined) ? (store.error = err) : store.error,
 
   addBookmark: bookmark => store.bookmarks.unshift(Object.assign(new Bookmark(), bookmark)),
   adding: bool => (bool!==undefined) ? (store.adding = bool) : store.adding,
